@@ -1,0 +1,12 @@
+= Spring MVC Sample API
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 2
+:sectlinks:
+
+[[Keyword-API]]
+== Keyword API
+=== Keyword 전체 조회
+operation::get-keyword-list[snippets='http-request,query-parameters,http-response,response-fields']

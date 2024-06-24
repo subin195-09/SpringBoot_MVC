@@ -115,7 +115,11 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 
 	// Spring Rest Docs: API 문서화를 위한 Asciidoctor 연동
+	asciidoctorExt("org.springframework.restdocs:spring-restdocs-asciidoctor")
 	testImplementation("org.springframework.restdocs:spring-restdocs-mockmvc")
+
+	// Mockito Kotlin: Kotlin에서 Mockito를 사용하기 위한 라이브러리
+	testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
 }
 
 // Kotlin 컴파일러 작업에 대한 설정
@@ -132,12 +136,58 @@ tasks.withType<Test> {
 	useJUnitPlatform()
 }
 
-// test 작업 설정: 테스트 실행 관련 설정
-tasks.test {
-	outputs.dir(project.extra["snippetsDir"]!!)
+// snippetsDir 변수 선언: 테스트 중 생성된 스니펫을 저장할 디렉토리 경로
+val snippetsDir by extra {
+	file("build/generated-snippets")
 }
 
-tasks.asciidoctor {
-	inputs.dir(project.extra["snippetsDir"]!!)
-	dependsOn(tasks.test)
+// tasks 블록: Gradle 작업(Task)을 구성
+tasks {
+	// asciidoctor 작업: AsciiDoctor를 이용하여 문서를 생성
+	asciidoctor {
+		onlyIf {
+			// 테스트가 실행된 후에만 작업을 실행
+			test.get().state.executed
+		}
+		// 입력 디렉토리로 snippetsDir 사용
+		inputs.dir(snippetsDir)
+		// asciidoctor 확장 구성 사용
+		configurations("asciidoctorExt")
+		// 소스 파일이 위치한 디렉토리
+		sourceDir("src/docs/asciidoc")
+
+		// 소스 파일 디렉토리를 기본 디렉토리로 사용
+		baseDirFollowsSourceFile()
+		// 출력 디렉토리 설정
+		outputs.dir(file("build/docs/asciidoc"))
+
+		doFirst {
+			// 작업 실행 전 메시지 출력
+			println("Starting asciidoctor...")
+		}
+	}
+	// copyDocument 작업: 생성된 문서를 특정 위치로 복사
+	register<Copy>("copyDocument") {
+		onlyIf {
+			// 테스트가 실행된 후에만 작업을 실행
+			test.get().state.executed
+		}
+		// asciidoctor 작업에 의존
+		dependsOn(asciidoctor)
+		// asciidoctor의 출력 파일을 복사원으로 지정
+		from(file(asciidoctor.get().outputs.files.singleFile.absolutePath))
+		// 복사 대상 디렉토리
+		into(file("src/main/resources/static/docs/"))
+
+		doFirst {
+			// 작업 실행 전 메시지 출력
+			println("Copying asciidoctor outputs to static/docs...")
+		}
+	}
+}
+
+// test 작업에 대한 설정
+tasks.named("test") {
+	// test 작업이 완료된 후 copyDocument 작업을 실행
+	finalizedBy("copyDocument")
 }
