@@ -33,7 +33,7 @@
 
 1. Swagger
 > [http://localhost:8000/swagger-ui/index.html](http://localhost:8000/swagger-ui/index.html)
-<br></br>
+
 2. Spring REST Docs
 > [http://localhost:8000/docs/index.html](http://localhost:8000/docs/index.html)
 
