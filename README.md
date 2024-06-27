@@ -40,10 +40,6 @@
 
 ## 🗂️ **Structure**
 ```bash
-.github                   # Github 설정(Action, Template, Slack)
-
-libs                      # 수동으로 포함된 라이브러리들
-
 src.docs.asciidoc
 ├── index.adoc            # 프로젝트 API 문서화를 위한 RestDocs 설정 포함
 
